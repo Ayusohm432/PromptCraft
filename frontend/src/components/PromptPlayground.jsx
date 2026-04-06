@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Play, Plus, Loader, ChevronDown } from 'lucide-react';
 import EvaluationPanel from './EvaluationPanel';
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
 
 function PromptPlayground() {
   const [taskType, setTaskType] = useState('Summarization');
