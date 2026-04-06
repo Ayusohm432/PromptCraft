@@ -8,6 +8,39 @@ from database import engine, get_db, Base
 import models
 from llm_service import generate_gemini_response
 
+import os
+import time
+import threading
+import requests
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def keep_alive():
+    url = os.environ.get("RENDER_EXTERNAL_URL")
+
+    # If the URL isn't set, just skip—no crash, no fuss
+    if not url:
+        logger.info("KeepAlive: no URL found, skipping")
+        return
+
+    logger.info(f"KeepAlive: pinging {url} every 5 minutes...")
+
+    while True:
+        try:
+            requests.get(url, timeout=10)
+            logger.info("KeepAlive: ping sent ✓")
+        except Exception as e:
+            logger.error(f"KeepAlive: something went wrong — {e}")
+
+        time.sleep(300)  # sleep for 5 minutes, then repeat
+
+# Start the keep-alive in a background thread (daemon=True means it
+# shuts down automatically when your main app stops—no cleanup needed)
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
+
 # Create DB Tables
 Base.metadata.create_all(bind=engine)
 
